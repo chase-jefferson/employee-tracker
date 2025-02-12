@@ -48,4 +48,4 @@ If you have any questions about the repo, open an issue or contact me directly a
 
 ## Application in Use
 
-![Link to Video]([https://img.shields.io/badge/license-MIT-blue.svg](https://drive.google.com/file/d/1kd4s-wvcsUFCiTiVTDI-n094uRUVYrLv/view?usp=sharing))
+![Link to Video]([[https://img.shields.io/badge/license-MIT-blue.svg](https://drive.google.com/file/d/1kd4s-wvcsUFCiTiVTDI-n094uRUVYrLv/view?usp=sharing](https://drive.google.com/file/d/1jPvjFQ_Z5beAwQZqiSu5hteVeEk7DEuf/view)))
