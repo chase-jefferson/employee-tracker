@@ -38,13 +38,12 @@ export default class Db {
   }
 
   // Create a new department
-async createDepartment(departmentName: string) {
+  async createDepartment(departmentName: string) {
     return this.query(
       'INSERT INTO department (department_name) VALUES ($1)',
       [departmentName]
     );
   }
-  
 
   // Find all departments
   async findAllDepartments() {
@@ -121,11 +120,37 @@ async createDepartment(departmentName: string) {
   // View utilized budget by department
   async findUtilizedBudgetByDepartment() {
     return this.query(
-      `SELECT department.department_name AS department, SUM(role.salary) AS utilized_budget 
-       FROM employee 
-       LEFT JOIN role ON employee.role_id = role.id 
-       LEFT JOIN department ON role.department_id = department.id 
+      `SELECT department.department_name AS department, COALESCE(SUM(role.salary), 0) AS utilized_budget 
+       FROM department 
+       LEFT JOIN role ON department.id = role.department_id 
+       LEFT JOIN employee ON role.id = employee.role_id 
        GROUP BY department.department_name`
     );
   }
-};
+
+  // Update employee role
+  async updateEmployeeRole(employeeId: number, roleId: number) {
+    return this.query(
+      'UPDATE employee SET role_id = $1 WHERE id = $2',
+      [roleId, employeeId]
+    );
+  }
+
+  // Update employee manager
+  async updateEmployeeManager(employeeId: number, managerId: number) {
+    return this.query(
+      'UPDATE employee SET manager_id = $1 WHERE id = $2',
+      [managerId, employeeId]
+    );
+  }
+
+  // Remove a department
+  async removeDepartment(departmentId: number) {
+    return this.query(
+      'DELETE FROM department WHERE id = $1',
+      [departmentId]
+    );
+  }
+}
+
+

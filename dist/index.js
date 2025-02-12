@@ -197,7 +197,10 @@ async function addEmployee() {
     const { rows: roles } = await db.findAllRoles();
     const { rows: employees } = await db.findAllEmployees();
     const roleChoices = roles.map(({ id, title }) => ({ name: title, value: id }));
-    const managerChoices = employees.map(({ id, first_name, last_name }) => ({ name: `${first_name} ${last_name}`, value: id }));
+    const managerChoices = [
+        { name: 'None', value: null },
+        ...employees.map(({ id, first_name, last_name }) => ({ name: `${first_name} ${last_name}`, value: id }))
+    ];
     inquirer.prompt([
         { type: 'input', name: 'firstName', message: "What is the employee's first name?" },
         { type: 'input', name: 'lastName', message: "What is the employee's last name?" },
@@ -239,10 +242,90 @@ async function viewEmployeesByDepartment() {
             .then(() => loadMainPrompts());
     });
 }
+async function updateEmployeeRole() {
+    const { rows: employees } = await db.findAllEmployees();
+    const { rows: roles } = await db.findAllRoles();
+    const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
+        name: `${first_name} ${last_name}`,
+        value: id
+    }));
+    const roleChoices = roles.map(({ id, title }) => ({
+        name: title,
+        value: id
+    }));
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employeeId',
+            message: "Which employee's role do you want to update?",
+            choices: employeeChoices
+        },
+        {
+            type: 'list',
+            name: 'roleId',
+            message: "What is the employee's new role?",
+            choices: roleChoices
+        }
+    ]).then(({ employeeId, roleId }) => {
+        db.updateEmployeeRole(employeeId, roleId)
+            .then(() => console.log(`Updated employee's role successfully.`))
+            .then(() => loadMainPrompts());
+    });
+}
+async function updateEmployeeManager() {
+    const { rows: employees } = await db.findAllEmployees();
+    const employeeChoices = employees.map(({ id, first_name, last_name }) => ({
+        name: `${first_name} ${last_name}`,
+        value: id
+    }));
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employeeId',
+            message: "Which employee's manager do you want to update?",
+            choices: employeeChoices
+        }
+    ]).then(({ employeeId }) => {
+        const managerChoices = employees
+            .filter(({ id }) => id !== employeeId) // Prevent employee from being their own manager
+            .map(({ id, first_name, last_name }) => ({
+            name: `${first_name} ${last_name}`,
+            value: id
+        }));
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'managerId',
+                message: "Who is the employee's new manager?",
+                choices: managerChoices
+            }
+        ]).then(({ managerId }) => {
+            db.updateEmployeeManager(employeeId, managerId)
+                .then(() => console.log(`Updated employee's manager successfully.`))
+                .then(() => loadMainPrompts());
+        });
+    });
+}
+async function removeDepartment() {
+    const { rows: departments } = await db.findAllDepartments();
+    const departmentChoices = departments.map(({ id, department_name }) => ({
+        name: department_name,
+        value: id
+    }));
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'departmentId',
+            message: 'Which department do you want to remove?',
+            choices: departmentChoices
+        }
+    ]).then(({ departmentId }) => {
+        db.removeDepartment(departmentId)
+            .then(() => console.log(`Removed department successfully.`))
+            .then(() => loadMainPrompts());
+    });
+}
 // Placeholder functions for missing cases
-function updateEmployeeRole() { console.log('Update Employee Role not implemented yet'); loadMainPrompts(); }
-function updateEmployeeManager() { console.log('Update Employee Manager not implemented yet'); loadMainPrompts(); }
 // Placeholder function for missing cases
 // Placeholder function for missing cases
 // function addDepartment() { console.log('Add Department not implemented yet'); loadMainPrompts(); }
-function removeDepartment() { console.log('Remove Department not implemented yet'); loadMainPrompts(); }
